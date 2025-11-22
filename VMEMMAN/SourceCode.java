@@ -8,6 +8,7 @@ public class SourceCode{
 
     static int[] pageSizes = {512, 1024, 2048};
     static int[] frameCount = {4, 8, 12};
+    static String fileString = "";
 
 private static void loadFile(File p) throws IOException {//standard file reader + buffered reader combo. not much to say here
 		try (BufferedReader br = new BufferedReader(new FileReader(p))) {
@@ -144,6 +145,13 @@ return faultCount;//return fault count
                 printStats(pageSize, frames, "LRU", f2, total);
                 printStats(pageSize, frames, "MRU", f3, total);
                 printStats(pageSize, frames, "OPT", f4, total);
+                
+                fileString += printStatsForFile(pageSize, frames, "FIFO", f1, total) +
+                             printStatsForFile(pageSize, frames, "LRU", f2, total) + 
+                             printStatsForFile(pageSize, frames, "MRU", f3, total) +
+                             printStatsForFile(pageSize, frames, "OPT", f4, total);
+                
+                
             }
         }
 
@@ -152,13 +160,27 @@ return faultCount;//return fault count
         double fpr = (faults * 100.0)/total;//get the percent of faults
         System.out.printf("%8d | %6d | %9s | %7.2f%%%n", size, frames, alg, fpr);//formatted print
     }
+     public static String printStatsForFile(int size, int frames, String alg, int faults, int total){
+        double fpr = (faults * 100.0)/total;//get the percent of faults
+        return String.format("%8d | %6d | %9s | %7.2f%%%n", size, frames, alg, fpr);//formatted string
+    }
+    public static void writeToFile(File file, String string){
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))){//append false for overwrite
+            bw.write(fileString);//write to the file
+            System.out.println("Content overwritten");//success
+        }
+        catch (IOException e) {
+            System.err.println("error overwriting file" + e.getMessage());//fail
+        }
+}
+    
 
  public static void main(String[] args) throws Exception {
  File filePath = new File("VMEMMAN\\Sample input data files.txt");//feed the file path
+ File filePath2 = new File("VMEMMAN\\Sample output file.txt");//feed the file path
         loadFile(filePath);//load the file
-
         runSim(dataStorage);//run the sim
-    
+        writeToFile(filePath2, fileString);//overwite sample output
 }
     
 }
